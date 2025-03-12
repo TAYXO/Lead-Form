@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facebook Page Lead Genaration</title>
+    <title>Facebook Page Lead Entry Form</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,13 +41,13 @@
 <body>
 
     <div class="container">
-        <h2>Facebook Page Lead Genaration</h2>
+        <h2>Facebook Page Lead Entry Form</h2>
         <form id="pageForm">
             <input type="text" id="pageName" placeholder="Page Name" required><br>
             <input type="tel" id="contactNumber" placeholder="Contact Number" required><br>
             <input type="url" id="pageLink" placeholder="Page Link" required><br>
             <input type="url" id="recentBoostedLink" placeholder="Recent Boosted Post Link" required><br>
-            <input type="number" id="totalPageLikes" placeholder="Total Page Likes" required><br>
+            <input type="number" id="totalPageLikes" placeholder="Total Page Likes" min="5000" required><br>
             <button type="submit">Submit</button>
         </form>
         <p id="responseMessage"></p>
@@ -57,23 +57,32 @@
         document.getElementById("pageForm").addEventListener("submit", function(e) {
             e.preventDefault();
 
+            let totalPageLikes = document.getElementById("totalPageLikes").value.trim();
+            if (parseInt(totalPageLikes) < 5000) {
+                document.getElementById("responseMessage").innerHTML = "<span style='color: red;'>Total Page Likes must be at least 5000!</span>";
+                return;
+            }
+
             var data = {
                 pageName: document.getElementById("pageName").value.trim(),
                 contactNumber: document.getElementById("contactNumber").value.trim(),
                 pageLink: document.getElementById("pageLink").value.trim(),
                 recentBoostedLink: document.getElementById("recentBoostedLink").value.trim(),
-                totalPageLikes: document.getElementById("totalPageLikes").value.trim()
+                totalPageLikes: totalPageLikes
             };
 
-            fetch("https://script.google.com/macros/s/AKfycbwI1WR4PyqWN08J2HMv_bVnJRtr_GYS3OnkX8_PQB0KrapFZoUKZiloZCrSSLGicp0u/exec", {
+            fetch("https://script.google.com/macros/s/AKfycbxWnB_ic1pg9A0JXqnLHES5yQYElsESwe7xxI57p6fkSIT7x0iF3Z6-zBYWWGKnJpqC/exec", {
                 method: "POST",
                 body: JSON.stringify(data),
+                headers: { "Content-Type": "application/json" }
             })
             .then(res => res.text())
             .then(response => {
                 let message = document.getElementById("responseMessage");
                 if (response === "Duplicate Entry") {
                     message.innerHTML = "<span style='color: red;'>Duplicate entry found! Contact Number, Page Link, or Boosted Post Link already exists.</span>";
+                } else if (response === "No User Email Found") {
+                    message.innerHTML = "<span style='color: red;'>You must be signed in with a Google account.</span>";
                 } else {
                     message.innerHTML = "<span style='color: green;'>Data submitted successfully!</span>";
                     document.getElementById("pageForm").reset();
